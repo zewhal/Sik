@@ -1,0 +1,26 @@
+{
+  "keywords": [
+    "coffee shop",
+    "pizza delivery",
+    "plumber",
+    "hair salon",
+    "dentist",
+    "real estate agent",
+    "car repair",
+    "lawyer",
+    "gym",
+    "taco restaurant"
+  ],
+  "locations": [
+    "New York",
+    "Los Angeles",
+    "Chicago",
+    "Houston",
+    "Phoenix",
+    "San Francisco",
+    "Miami",
+    "Boston",
+    "Seattle",
+    "Austin"
+  ]
+}
