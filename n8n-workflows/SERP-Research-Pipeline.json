@@ -1,0 +1,276 @@
+{
+  "name": "SERP-Research-Pipeline",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        112
+      ],
+      "id": "82f07e1e-0ace-4f02-9e45-f2ac94953582",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "sik/n8n-workflows/data/example-queries.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        224,
+        112
+      ],
+      "id": "e3e1dc0d-1d93-4439-8c7e-d013d31c56c1",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        112
+      ],
+      "id": "340bb557-92a7-45fa-b9d3-d4c3eaafa03d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "content": "## Sample data\nSample data in ./n8n-workflows/example-queries.csv",
+        "height": 96,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "c7a60ecd-845d-47ff-b5e4-7a0f6cfa9787",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \n  {\n    queries: $json.data.keywords.flatMap(keyword =>\n      $json.data.locations.map(location => ({\n        query: `${keyword} ${location}`,\n        page: 1,\n        pageStart: 0\n      }))\n    )\n  }\n}}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        112
+      ],
+      "id": "5db86db3-2903-4a6d-a9bd-6556b86e75b1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "queries",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        896,
+        112
+      ],
+      "id": "7a65b98e-8e06-49e4-bf60-615c54aa7fe3",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/ecosia",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.queries }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 5000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1344,
+        160
+      ],
+      "id": "a4db5ede-da90-45bf-bc2c-0022b0eddc21",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "batchSize": 2,
+        "options": {
+          "reset": true
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        112
+      ],
+      "id": "7685c397-93c2-437d-9205-7860fed447a7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        160
+      ],
+      "id": "1bd343e5-d759-42f6-8529-c5a34afe2c2d",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "sik/n8n-workflows/data/example-queries-result.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        160
+      ],
+      "id": "e24a9b20-0cf7-4b93-b559-5749790786a9",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "content": "## Sample result data\nSample data in ./n8n-workflows/example-queries-result.csv",
+        "height": 112
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        16
+      ],
+      "id": "819b3b4e-1dd0-4b2b-a245-f5732941de7b",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bba38e35-ed99-453d-a15a-45d903463a4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d39ae5ee9c6ec76adedda736ff47bafcebf9b091638a5099c2c4edbc82d9eb7c"
+  },
+  "id": "ulVbhqwZHqL9R8ih",
+  "tags": []
+}
